@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Puzzle Box II — play first</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
+</head>
+<body>
+<header>
+  <h1><span class="wisp">✨</span> Puzzle Box II</h1>
+  <p>A world that remembers. Play first — no code on this page.</p>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="puzzle.html">Puzzle Box</a>
+    <a href="source.html">Source, after you play</a>
+  </nav>
+</header>
+<main>
+  <div class="card">
+    <h2>How to play</h2>
+    <p>Pick a seed, or keep 9999, and start a world. Look at the grid, wait, probe a cell, poke a cell, check the tide, the echoes, the forecast. Mark ticks you want to remember. Run the same seed again later — the observer remembers you, even though the world starts again from tick 0.</p>
+    <p>Coordinates here are shown as hex, like the original: a is 10, b is 11. The picker shows both, so you don't have to do the conversion in your head.</p>
+    <p id="status">Loading the world engine… this needs the Pyodide runtime from the internet, just once.</p>
+  </div>
+
+  <div class="card">
+    <label for="seed">Seed</label>
+    <input id="seed" type="number" value="9999" min="0" max="99999">
+    <button id="startBtn" disabled>Start world</button>
+    <button id="newBtn" class="secondary" disabled>New world, same seed</button>
+  </div>
+
+  <div class="card">
+    <div class="controls">
+      <button data-act="look" disabled>Look</button>
+      <button data-act="tide" disabled>Tide</button>
+      <button data-act="echoes" disabled>Echoes</button>
+      <button data-act="forecast" disabled>Forecast</button>
+      <button data-act="marks" disabled>Marks</button>
+      <button data-act="observer" disabled>Observer</button>
+      <button data-act="history" disabled>History</button>
+      <button data-act="timeline" disabled>Timeline</button>
+    </div>
+    <div class="controls">
+      <label for="px">Probe / poke cell</label>
+      <select id="px"></select>
+      <select id="py"></select>
+      <button id="probeBtn" disabled>Probe</button>
+      <button id="pokeBtn" disabled>Poke</button>
+    </div>
+    <div class="controls">
+      <label for="waitN">Wait</label>
+      <select id="waitN">
+        <option value="1">1 tick</option>
+        <option value="5">5 ticks</option>
+        <option value="20" selected>20 ticks</option>
+        <option value="50">50 ticks</option>
+        <option value="100">100 ticks</option>
+        <option value="200">200 ticks</option>
+      </select>
+      <button id="waitBtn" disabled>Wait</button>
+      <label for="markLabel">Mark label</label>
+      <input id="markLabel" type="text" placeholder="e.g. meridian lock">
+      <button id="markBtn" disabled>Mark this tick</button>
+    </div>
+  </div>
+
+  <pre id="output">Waiting for the engine…</pre>
+
+  <p class="note">In this web version, observer memory (sessions, probe counts, marks) is kept in this browser's local storage, per seed, so it survives a page reload. It does not travel with you to another browser. The command-line version keeps it in a file next to the script instead.</p>
+</main>
+<footer>
+  <p>Seeded micro-world, no win condition, rules not documented. If you want the source after playing, it is on the <a href="source.html">source page</a>.</p>
+</footer>
+<script src="app.js"></script>
+</body>
+</html>
