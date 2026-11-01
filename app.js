@@ -1,8 +1,12 @@
 // app.js — Puzzle Box II play page. Pyodide runs the real Python game;
 // this file only wires buttons to it and keeps observer memory in
 // localStorage, per seed, so it survives a page reload.
+// v2 (data-first): the same play UI, plus a data console — structured
+// JSON export, queries, replay-to-tick, diff since last look, and a
+// multi-seed survey. The data layer changes no rules.
 let pyodide = null;
 let currentSeed = 9999;
+let lastLookState = null;
 
 const $ = (id) => document.getElementById(id);
 const output = $('output');
@@ -69,6 +73,7 @@ async function startWorld() {
   restoreObserver(seed);
   const text = run('start', seed);
   syncObserver(seed);
+  try { lastLookState = JSON.parse(run('state_json')); } catch (e) { lastLookState = null; }
   statusEl.textContent = 'World started, seed ' + seed + '. The observer counts this as a session.';
   show(text);
 }
@@ -81,7 +86,28 @@ function act(name) {
   try {
     const text = run(name);
     syncObserver(currentSeed);
+    if (name === 'look') {
+      try { lastLookState = JSON.parse(run('state_json')); } catch (e) { /* keep old */ }
+    }
     show(text);
+  } catch (e) { show('Error: ' + e.message); }
+}
+
+function diffSinceLastLook() {
+  try {
+    const current = JSON.parse(run('state_json'));
+    if (!lastLookState) { show('No previous look to diff against. Click Look first.'); return; }
+    const prev = new Map(lastLookState.cells.map((c) => [c.x + ',' + c.y, c]));
+    const changes = [];
+    for (const c of current.cells) {
+      const p = prev.get(c.x + ',' + c.y);
+      if (p && p.type !== c.type) changes.push('  ' + c.x.toString(16) + ',' + c.y.toString(16) + '  ' + p.type + ' -> ' + c.type);
+    }
+    if (!changes.length) {
+      show('No changes since t' + lastLookState.tick + ' (last look). The grid is unchanged since then.');
+    } else {
+      show('Diff since t' + lastLookState.tick + ' to t' + current.tick + ' (' + changes.length + ' cell type change(s)):\n' + changes.join('\n'));
+    }
   } catch (e) { show('Error: ' + e.message); }
 }
 
@@ -120,6 +146,42 @@ document.addEventListener('DOMContentLoaded', () => {
   $('markBtn').addEventListener('click', () => {
     try { const t = run('mark', $('markLabel').value || ''); syncObserver(currentSeed); show(t); }
     catch (e) { show('Error: ' + e.message); }
+  });
+
+  // v2 data console
+  $('queryBtn').addEventListener('click', () => {
+    try { const t = run('query', $('queryInput').value || ''); show(t); }
+    catch (e) { show('Error: ' + e.message); }
+  });
+  $('exportBtn').addEventListener('click', () => {
+    try {
+      const json = run('state_json');
+      const data = JSON.parse(json);
+      const blob = new Blob([json], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'puzzle-box-seed' + data.seed + '-t' + data.tick + '.json';
+      a.click();
+      URL.revokeObjectURL(a.href);
+      show(json);
+    } catch (e) { show('Error: ' + e.message); }
+  });
+  $('replayBtn').addEventListener('click', () => {
+    try {
+      const t = run('replay', parseInt($('replayTick').value, 10));
+      syncObserver(currentSeed);
+      try { lastLookState = JSON.parse(run('state_json')); } catch (e) { /* keep old */ }
+      show(t);
+    } catch (e) { show('Error: ' + e.message); }
+  });
+  $('diffBtn').addEventListener('click', diffSinceLastLook);
+  $('surveyBtn').addEventListener('click', () => {
+    try {
+      statusEl.textContent = 'Survey running… stepping 10 seeds to t250.';
+      const t = run('survey');
+      statusEl.textContent = 'Survey done.';
+      show(t);
+    } catch (e) { show('Error: ' + e.message); }
   });
 
   init();

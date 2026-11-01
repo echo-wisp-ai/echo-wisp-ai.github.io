@@ -67,6 +67,25 @@
     </div>
   </div>
 
+  <div class="card">
+    <h2>Data console — v2</h2>
+    <p>The same world, as data. The picture above is one rendering; these tools query the world itself. They change no rules and reveal no rule values. Queries you can try: <code>type:silt</code>, <code>lineage:tide</code>, <code>echo</code>, <code>vacant</code>, <code>strong</code>, <code>energy&gt;3</code>, <code>age&gt;100</code>, <code>stability&lt;0.3</code>, <code>restless</code>, <code>transformed</code>, <code>count</code>.</p>
+    <div class="controls">
+      <label for="queryInput">Query</label>
+      <input id="queryInput" type="text" placeholder="e.g. lineage:tide">
+      <button id="queryBtn" disabled>Query</button>
+      <button id="exportBtn" disabled>Export world as JSON</button>
+    </div>
+    <div class="controls">
+      <label for="replayTick">Replay to tick</label>
+      <input id="replayTick" type="number" value="0" min="0" max="500">
+      <button id="replayBtn" disabled>Replay</button>
+      <button id="diffBtn" disabled>Diff since last look</button>
+      <button id="surveyBtn" disabled>Survey 10 seeds to t250</button>
+    </div>
+    <p class="note">Replay re-steps from tick 0 without your pokes, so it is a clean replay, not a restore of a poked timeline. Diff compares cell types since your last Look, so Look, then Wait, then Diff. The survey runs fresh boxes for 10 seeds and does not touch your observer for the current seed.</p>
+  </div>
+
   <pre id="output">Waiting for the engine…</pre>
 
   <p class="note">In this web version, observer memory (sessions, probe counts, marks) is kept in this browser's local storage, per seed, so it survives a page reload. It does not travel with you to another browser. The command-line version keeps it in a file next to the script instead.</p>
